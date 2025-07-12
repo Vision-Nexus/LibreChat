@@ -5,14 +5,16 @@ import type {
   SearchProviders,
   TWebSearchConfig,
 } from './config';
-import { extractVariableName } from './utils';
 import { SearchCategories, SafeSearchTypes } from './config';
+import { extractVariableName } from './utils';
 import { AuthType } from './schemas';
 
 export function loadWebSearchConfig(
   config: TCustomConfig['webSearch'],
 ): TCustomConfig['webSearch'] {
   const serperApiKey = config?.serperApiKey ?? '${SERPER_API_KEY}';
+  const searxngInstanceUrl = config?.searxngInstanceUrl ?? '${SEARXNG_INSTANCE_URL}';
+  const searxngApiKey = config?.searxngApiKey ?? '${SEARXNG_API_KEY}';
   const firecrawlApiKey = config?.firecrawlApiKey ?? '${FIRECRAWL_API_KEY}';
   const firecrawlApiUrl = config?.firecrawlApiUrl ?? '${FIRECRAWL_API_URL}';
   const jinaApiKey = config?.jinaApiKey ?? '${JINA_API_KEY}';
@@ -25,6 +27,8 @@ export function loadWebSearchConfig(
     jinaApiKey,
     cohereApiKey,
     serperApiKey,
+    searxngInstanceUrl,
+    searxngApiKey,
     firecrawlApiKey,
     firecrawlApiUrl,
   };
@@ -32,6 +36,8 @@ export function loadWebSearchConfig(
 
 export type TWebSearchKeys =
   | 'serperApiKey'
+  | 'searxngInstanceUrl'
+  | 'searxngApiKey'
   | 'firecrawlApiKey'
   | 'firecrawlApiUrl'
   | 'jinaApiKey'
@@ -46,6 +52,11 @@ export const webSearchAuth = {
   providers: {
     serper: {
       serperApiKey: 1 as const,
+    },
+    searxng: {
+      searxngInstanceUrl: 1 as const,
+      /** Optional (0) */
+      searxngApiKey: 0 as const,
     },
   },
   scrapers: {
@@ -64,22 +75,28 @@ export const webSearchAuth = {
 /**
  * Extracts all API keys from the webSearchAuth configuration object
  */
-export const webSearchKeys: TWebSearchKeys[] = [];
+export function getWebSearchKeys(): TWebSearchKeys[] {
+  const keys: TWebSearchKeys[] = [];
 
-// Iterate through each category (providers, scrapers, rerankers)
-for (const category of Object.keys(webSearchAuth)) {
-  const categoryObj = webSearchAuth[category as TWebSearchCategories];
+  // Iterate through each category (providers, scrapers, rerankers)
+  for (const category of Object.keys(webSearchAuth)) {
+    const categoryObj = webSearchAuth[category as TWebSearchCategories];
 
-  // Iterate through each service within the category
-  for (const service of Object.keys(categoryObj)) {
-    const serviceObj = categoryObj[service as keyof typeof categoryObj];
+    // Iterate through each service within the category
+    for (const service of Object.keys(categoryObj)) {
+      const serviceObj = categoryObj[service as keyof typeof categoryObj];
 
-    // Extract the API keys from the service
-    for (const key of Object.keys(serviceObj)) {
-      webSearchKeys.push(key as TWebSearchKeys);
+      // Extract the API keys from the service
+      for (const key of Object.keys(serviceObj)) {
+        keys.push(key as TWebSearchKeys);
+      }
     }
   }
+
+  return keys;
 }
+
+export const webSearchKeys: TWebSearchKeys[] = getWebSearchKeys();
 
 export function extractWebSearchEnvVars({
   keys,
