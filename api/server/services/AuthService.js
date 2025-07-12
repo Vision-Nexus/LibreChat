@@ -82,9 +82,8 @@ const createTokenHash = () => {
 const sendVerificationEmail = async (user) => {
   const [verifyToken, hash] = createTokenHash();
 
-  const verificationLink = `${
-    domains.client
-  }/verify?token=${verifyToken}&email=${encodeURIComponent(user.email)}`;
+  const verificationLink = `${domains.client
+    }/verify?token=${verifyToken}&email=${encodeURIComponent(user.email)}`;
   await sendEmail({
     email: user.email,
     subject: 'Verify your email',
@@ -378,13 +377,13 @@ const setAuthTokens = async (userId, res, sessionId = null) => {
       expires: new Date(refreshTokenExpires),
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
+      sameSite: 'none',
     });
     res.cookie('token_provider', 'librechat', {
       expires: new Date(refreshTokenExpires),
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
+      sameSite: 'none',
     });
     return token;
   } catch (error) {
@@ -423,13 +422,13 @@ const setOpenIDAuthTokens = (tokenset, res) => {
       expires: expirationDate,
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
+      sameSite: 'none',
     });
     res.cookie('token_provider', 'openid', {
       expires: expirationDate,
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
+      sameSite: 'none',
     });
     return tokenset.access_token;
   } catch (error) {
@@ -458,9 +457,8 @@ const resendVerificationEmail = async (req) => {
 
     const [verifyToken, hash] = createTokenHash();
 
-    const verificationLink = `${
-      domains.client
-    }/verify?token=${verifyToken}&email=${encodeURIComponent(user.email)}`;
+    const verificationLink = `${domains.client
+      }/verify?token=${verifyToken}&email=${encodeURIComponent(user.email)}`;
 
     await sendEmail({
       email: user.email,

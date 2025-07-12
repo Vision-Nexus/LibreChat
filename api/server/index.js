@@ -130,6 +130,28 @@ const startServer = async () => {
     const lang = req.cookies.lang || req.headers['accept-language']?.split(',')[0] || 'en-US';
     const saneLang = lang.replace(/"/g, '&quot;');
     const updatedIndexHtml = indexHTML.replace(/lang="en-US"/g, `lang="${saneLang}"`);
+
+    const cookieOptions = {
+      path: '/',
+      expires: null,
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+    };
+    if (req.query.refreshToken) {
+      res.cookie('refreshToken', req.query.refreshToken, cookieOptions);
+    }
+    if (req.query.token_provider) {
+      res.cookie('token_provider', req.query.token_provider, cookieOptions);
+    }
+    if (req.query.linewiseAccessToken) {
+      res.cookie('linewiseAccessToken', req.query.linewiseAccessToken, {
+        ...cookieOptions,
+        httpOnly: false,
+        expires: null,
+      });
+    }
+
     res.type('html');
     res.send(updatedIndexHtml);
   });

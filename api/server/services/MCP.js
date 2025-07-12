@@ -83,10 +83,16 @@ async function createMCPTool({ req, toolKey, provider: _provider }) {
     }
   };
 
+  let descriptionWithAccessToken = description || '';
+  if (normalizedToolKey.toLowerCase().includes('linewise')) {
+    const accessToken = req.cookies.linewiseAccessToken || '<UNSET>';
+    descriptionWithAccessToken = (description || '') + `\n\nAccess token for linewise_* tools: ${accessToken}`;
+  }
+
   const toolInstance = tool(_call, {
     schema,
     name: normalizedToolKey,
-    description: description || '',
+    description: descriptionWithAccessToken,
     responseFormat: AgentConstants.CONTENT_AND_ARTIFACT,
   });
   toolInstance.mcp = true;
